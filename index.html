@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Otterly PDF – Free PDF Tools</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#f6f6fb;--card:#fff;--tx:#1c1c2e;--mu:#6a6a82;--ac:#e5322d;--bd:#e2e2ee;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#13131b;--card:#1c1c28;--tx:#f1f1f8;--mu:#9b9bb2;--bd:#2d2d3f}}
+:root[data-theme="dark"]{--bg:#13131b;--card:#1c1c28;--tx:#f1f1f8;--mu:#9b9bb2;--bd:#2d2d3f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:960px;margin:0 auto;padding:0 18px}
+header{border-bottom:1px solid var(--bd);background:var(--card)}
+header .w{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;min-height:60px;padding-top:8px;padding-bottom:8px}
+.logo{font-weight:800;font-size:20px;color:var(--tx);text-decoration:none}
+h1{font-size:clamp(28px,6vw,46px);line-height:1.1;margin:36px 0 10px}
+.mu,small,em{color:var(--mu)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin:26px 0 40px}
+.tc{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px;text-align:left;cursor:pointer;font:inherit;color:inherit;transition:.15s}
+.tc:hover{border-color:var(--ac);transform:translateY(-2px)}
+.tc i{font-style:normal;font-size:28px;display:block}.tc b{display:block;margin:6px 0 2px}.tc span{color:var(--mu);font-size:14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:20px;margin-bottom:30px}
+.drop{display:block;border:2px dashed var(--bd);border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer}
+.drop small{display:block;margin-top:4px}.drop:hover{border-color:var(--ac)}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:10px;padding:11px 20px;font:600 15px system-ui,sans-serif;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.ghost{background:transparent;color:var(--tx);border:1px solid var(--bd)}
+.btn.sm{padding:7px 12px;font-size:14px}.btn:disabled{opacity:.4;cursor:default}
+.list{list-style:none;padding:0;margin:12px 0}
+.list li{display:flex;gap:6px;align-items:center;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;margin-bottom:6px}
+.list li span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list button{border:1px solid var(--bd);background:transparent;color:var(--tx);border-radius:6px;cursor:pointer}
+.opts{margin:12px 0}.opts label{display:block;margin:6px 0}
+textarea,select,input:not([type=range]):not([type=file]):not([type=color]){font-family:inherit;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+.st{min-height:1.4em;color:var(--mu)}.st.err{color:var(--ac)}
+.stage{position:relative;display:inline-block;max-width:100%;overflow:auto;border:1px solid var(--bd);margin:10px 0}
+.stage canvas{display:block;cursor:crosshair}
+.it{position:absolute;font-family:Helvetica,Arial,sans-serif;line-height:1;white-space:nowrap;cursor:pointer}
+#pad{border:1px solid var(--bd);border-radius:8px;background:#fff;max-width:100%;cursor:crosshair}
+.tb{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.nav{display:flex;gap:12px;align-items:center;margin:10px 0}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:9}
+.mb{background:var(--card);border-radius:16px;padding:26px;max-width:380px;text-align:center}
+.mb .btn{margin:6px 4px}
+.inf{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:28px;text-align:center;margin:20px 0 44px}.inf i{font-size:30px;font-style:normal}.inf b{display:block;margin:6px 0}.inf p{margin:0;color:var(--mu);font-size:15px}
+.dev{display:flex;gap:12px;align-items:center;justify-content:center;margin:34px 0 10px}.av{width:52px;height:52px;border-radius:50%;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
+.sh{text-align:center;margin:26px 0 10px}.sh a{display:inline-flex;width:56px;height:46px;border-radius:8px;background:var(--bd);color:var(--tx);align-items:center;justify-content:center;font-weight:800;text-decoration:none;margin:0 6px}.sh a:hover{background:var(--ac);color:#fff}
+.rv{border-bottom:1px solid var(--bd);padding:10px 0}.rv div{margin-top:2px}
+footer{text-align:center;color:var(--mu);padding:24px 0 40px;font-size:14px}
+[hidden]{display:none!important}
+</style></head><body>
+<header><div class="w"><a class="logo" href="#" id="nm"></a><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost sm" id="th"></button><a class="btn sm cof" target="_blank" rel="noopener"></a></span></div></header>
+<main class="w">
+<section id="home"><h1>Free PDF tools,<br>right in your browser</h1>
+<p class="mu">Merge, split, compress, edit, sign and convert PDFs. No sign-up, no limits, and your files never leave your device.</p>
+<div class="grid" id="grid"></div>
+<h2 style="text-align:center;font-size:30px;margin:10px 0">Information</h2>
+<div class="inf"><div><i>🧰</i><b>Everything in one toolbox</b><p>Merge, split, compress, edit, sign and convert your PDFs, or turn images into PDFs and back, all from a single website.</p></div>
+<div><i>👌</i><b>Simple by design</b><p>Pick a tool, drop in your file and press a button. No manuals and no learning curve.</p></div>
+<div><i>🔒</i><b>Your privacy comes first</b><p>Your documents are handled right inside your browser and are never uploaded to any server, so nobody else ever sees them.</p></div>
+<div><i>🌐</i><b>Nothing to install</b><p>Open the page and start working. There’s no software to download and no extension to add.</p></div>
+<div><i>📱</i><b>Works on any device</b><p>Use it on a phone, tablet, laptop or desktop, with Windows, Mac, Linux, Android or iOS.</p></div>
+<div><i>⚡</i><b>Fast and lightweight</b><p>Because nothing has to travel to a server and back, your results are ready in seconds.</p></div>
+<div><i>💸</i><b>Completely free</b><p>Every tool is free to use. If it helps you, an optional coffee tip keeps the site running.</p></div>
+<div><i>♾️</i><b>No limits</b><p>No daily caps and no restrictions on how many files you process. Very large files depend on your device’s memory.</p></div>
+<div><i>🙅</i><b>No sign-up, no watermarks</b><p>You don’t need an account, and your finished files come out clean with nothing added.</p></div></div>
+<h2>⭐ Reviews</h2><p class="mu" id="ra">Loading reviews…</p><div id="rl"></div>
+<div class="card" id="rf" hidden><b>Leave a review</b><p style="margin:8px 0"><input id="rn" placeholder="Your name" maxlength="40"> <select id="rr"><option value="5">★★★★★ 5</option><option value="4">★★★★☆ 4</option><option value="3">★★★☆☆ 3</option><option value="2">★★☆☆☆ 2</option><option value="1">★☆☆☆☆ 1</option></select></p><textarea id="rc" rows="3" maxlength="300" placeholder="What did you think of Otterly PDF?" style="width:100%"></textarea><p><button class="btn" id="rb">Post review</button> <span class="mu" id="rs"></span></p></div>
+<div class="dev"><div class="av">AD</div><div>Developed by <b>Adrian Dom</b></div></div>
+<div class="sh"><h3 style="font-size:24px;margin:0 0 6px">Please share Otterly PDF with friends</h3><p class="mu" style="margin:0 0 14px">Help this free tool grow by spreading the word.</p><a id="shx" target="_blank" rel="noopener" title="Share on X">X</a><a id="shf" target="_blank" rel="noopener" title="Share on Facebook">f</a><a id="shl" target="_blank" rel="noopener" title="Share on LinkedIn">in</a></div></section>
+<section id="tool" hidden><p><button class="btn ghost sm" id="back">← All tools</button></p><h2 id="tt"></h2><p class="mu" id="td"></p><div class="card" id="tb"></div></section>
+</main>
+<footer><div class="w">Everything runs locally in your browser. Free forever, and if it helped you, <a class="cof" target="_blank" rel="noopener" style="color:var(--ac)"></a></div></footer>
+<div class="modal" id="dn" hidden><div class="mb"><div style="font-size:44px">✅☕</div><h3>Your file is ready!</h3>
+<p class="mu">This tool is free and I keep it that way on coffee. If it saved you time, a small tip means a lot.</p>
+<a class="btn cof" target="_blank" rel="noopener"></a><button class="btn ghost" id="no">Maybe later</button></div></div>
+<script>
+// ====== EDIT ME ======
+const CFG={name:"Otterly PDF",paypal:"https://www.paypal.com/ncp/payment/GY49H54S2QAKY",price:"$1",url:"https://claude.ai/artifact/1fE2TZrgZrNCV1X1aCQXnV"};
+// =====================
+const {PDFDocument,rgb,StandardFonts}=PDFLib,$=s=>document.querySelector(s);
+pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])),
+buf=f=>f.arrayBuffer(),cb=(c,t,q)=>new Promise(r=>c.toBlob(r,t,q)),
+getPdf=async f=>pdfjsLib.getDocument({data:new Uint8Array(await buf(f))}).promise,
+base=f=>f.name.replace(/\.[^.]+$/,"");
+async function rp(p,sc,cv){const v=p.getViewport({scale:sc});cv.width=v.width;cv.height=v.height;const x=cv.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,cv.width,cv.height);await p.render({canvasContext:x,viewport:v}).promise}
+async function finish(name,data){
+ let d=null;try{d=await window.claude?.use("downloads")}catch(e){}
+ if(d){try{await d.save({filename:name,data})}catch(e){if(e.code!=="declined")alert("Could not save the file: "+(e.message||e.code));return}}
+ else{const a=document.createElement("a");a.href=URL.createObjectURL(data instanceof Blob?data:new Blob([data]));a.download=name;a.click()}
+ $("#dn").hidden=false}
+const pdfAcc=".pdf,application/pdf";
+const T=[
+{id:"merge",n:"Merge PDF",i:"🧩",d:"Combine several PDFs into one.",accept:pdfAcc,multi:1,min:2,go:"Merge PDFs",hint:"Add 2 or more PDFs, then reorder them with the arrows.",
+ run:async fs=>{const o=await PDFDocument.create();for(const f of fs){const s=await PDFDocument.load(await buf(f),{ignoreEncryption:true});(await o.copyPages(s,s.getPageIndices())).forEach(p=>o.addPage(p))}return{name:"merged.pdf",data:await o.save()}}},
+{id:"split",n:"Split PDF",i:"✂️",d:"Extract pages or ranges.",accept:pdfAcc,go:"Split PDF",hint:"Choose one PDF.",
+ opts:`<label>Pages to extract <input name="r" placeholder="e.g. 1-3, 5, 7-9"></label><small>Each comma-separated part becomes its own PDF. Leave empty to split every page.</small>`,
+ run:async(fs,el)=>{const src=await PDFDocument.load(await buf(fs[0]),{ignoreEncryption:true}),n=src.getPageCount(),v=el.querySelector("[name=r]").value.trim(),gs=v?v.split(","):Array.from({length:n},(_,i)=>String(i+1)),outs=[];
+  for(const g of gs){const [a,b]=g.trim().split("-").map(Number),e=b||a;if(!(a>=1&&e<=n&&a<=e))throw Error("Invalid range “"+g.trim()+"” (this PDF has "+n+" pages)");const o=await PDFDocument.create();(await o.copyPages(src,Array.from({length:e-a+1},(_,i)=>a-1+i))).forEach(p=>o.addPage(p));outs.push(await o.save())}
+  if(outs.length==1)return{name:"split.pdf",data:outs[0]};const z=new JSZip();outs.forEach((d,i)=>z.file("part-"+(i+1)+".pdf",d));return{name:"split-pdfs.zip",data:await z.generateAsync({type:"blob"})}}},
+{id:"compress",n:"Compress PDF",i:"🗜️",d:"Make your PDF smaller.",accept:pdfAcc,go:"Compress PDF",hint:"Pages are rebuilt as compressed images, so text becomes non-selectable.",
+ opts:`<label>Quality <select name="q"><option value="0.5|1">Strong compression (smallest)</option><option value="0.7|1.4" selected>Balanced</option><option value="0.85|2">Light compression (best quality)</option></select></label>`,
+ run:async(fs,el,set)=>{const [q,sc]=el.querySelector("[name=q]").value.split("|").map(Number),b=await buf(fs[0]),pdf=await pdfjsLib.getDocument({data:new Uint8Array(b.slice(0))}).promise,o=await PDFDocument.create(),cv=document.createElement("canvas");
+  for(let i=1;i<=pdf.numPages;i++){set("Compressing page "+i+" of "+pdf.numPages+"…");const p=await pdf.getPage(i),v=p.getViewport({scale:1});await rp(p,sc,cv);const im=await o.embedJpg(await buf(await cb(cv,"image/jpeg",q)));o.addPage([v.width,v.height]).drawImage(im,{x:0,y:0,width:v.width,height:v.height})}
+  const out=await o.save(),sm=out.length<b.byteLength,kb=n=>(n/1024).toFixed(0)+" KB";return{name:"compressed.pdf",data:sm?out:b,note:sm?"Reduced from "+kb(b.byteLength)+" to "+kb(out.length)+".":"This PDF is already small, so the original was kept."}}},
+{id:"edit",n:"Edit PDF",i:"✏️",d:"Add text or cover content.",ed:"edit"},
+{id:"sign",n:"Sign PDF",i:"🖊️",d:"Draw and place your signature.",ed:"sign"},
+{id:"convert",n:"PDF Convert",i:"🔄",d:"PDF to text or HTML.",accept:pdfAcc,go:"Convert",hint:"Works on PDFs with selectable text (not scans).",
+ opts:`<label>Convert to <select name="f"><option value="txt">Plain text (.txt)</option><option value="html">Web page (.html)</option></select></label>`,
+ run:async(fs,el)=>{const f=el.querySelector("[name=f]").value,pdf=await getPdf(fs[0]),pgs=[];
+  for(let i=1;i<=pdf.numPages;i++){const t=await(await pdf.getPage(i)).getTextContent();let s="";t.items.forEach(x=>{s+=x.str+(x.hasEOL?"\n":" ")});pgs.push(s.trim())}
+  if(!pgs.join("").trim())throw Error("No selectable text found. This PDF may be a scan.");
+  if(f=="txt")return{name:base(fs[0])+".txt",data:pgs.map((p,i)=>"--- Page "+(i+1)+" ---\n"+p).join("\n\n")};
+  return{name:base(fs[0])+".html",data:'<!DOCTYPE html><meta charset="utf-8"><title>'+esc(base(fs[0]))+'</title><body style="font-family:sans-serif;max-width:800px;margin:2rem auto">'+pgs.map((p,i)=>"<h3>Page "+(i+1)+"</h3>"+p.split(/\n+/).map(l=>"<p>"+esc(l)+"</p>").join("")).join("<hr>")}}},
+{id:"img2pdf",n:"Image to PDF",i:"🖼️",d:"JPG, PNG, WebP to PDF.",accept:"image/*",multi:1,go:"Create PDF",hint:"Add one or more images; each becomes a page.",
+ opts:`<label>Page size <select name="s"><option value="fit">Same as image</option><option value="a4">A4 (image fitted)</option></select></label>`,
+ run:async(fs,el)=>{const a4=el.querySelector("[name=s]").value=="a4",o=await PDFDocument.create();
+  for(const f of fs){const b=new Uint8Array(await buf(f));let im;if(f.type=="image/jpeg")im=await o.embedJpg(b);else if(f.type=="image/png")im=await o.embedPng(b);else{const bm=await createImageBitmap(f),c=document.createElement("canvas");c.width=bm.width;c.height=bm.height;c.getContext("2d").drawImage(bm,0,0);im=await o.embedPng(new Uint8Array(await buf(await cb(c,"image/png"))))}
+   if(a4){const p=o.addPage([595,842]),k=Math.min(555/im.width,802/im.height),w=im.width*k,h=im.height*k;p.drawImage(im,{x:(595-w)/2,y:(842-h)/2,width:w,height:h})}else o.addPage([im.width,im.height]).drawImage(im,{x:0,y:0,width:im.width,height:im.height})}
+  return{name:"images.pdf",data:await o.save()}}},
+{id:"pdf2img",n:"PDF to Image",i:"📸",d:"Turn pages into PNG or JPG.",accept:pdfAcc,go:"Convert to images",hint:"Choose one PDF. Multiple pages are delivered as a ZIP.",
+ opts:`<label>Format <select name="f"><option value="png">PNG</option><option value="jpeg">JPG</option></select></label><label>Quality <select name="q"><option value="1.5">Standard</option><option value="2" selected>High</option><option value="3">Very high (large)</option></select></label>`,
+ run:async(fs,el,set)=>{const t=el.querySelector("[name=f]").value,sc=+el.querySelector("[name=q]").value,pdf=await getPdf(fs[0]),cv=document.createElement("canvas"),out=[],ext=t=="png"?"png":"jpg",bn=base(fs[0]);
+  for(let i=1;i<=pdf.numPages;i++){set("Rendering page "+i+" of "+pdf.numPages+"…");await rp(await pdf.getPage(i),sc,cv);out.push(await cb(cv,"image/"+t,.92))}
+  if(out.length==1)return{name:bn+"."+ext,data:out[0]};const z=new JSZip();out.forEach((b,i)=>z.file(bn+"-page-"+(i+1)+"."+ext,b));return{name:bn+"-images.zip",data:await z.generateAsync({type:"blob"})}}}
+];
+function generic(el,c){let fs=[];
+ el.innerHTML=`<label class="drop"><input type="file" hidden accept="${c.accept}" ${c.multi?"multiple":""}><b>Choose ${c.multi?"files":"a file"}</b> or drop here<small>${c.hint}</small></label><ul class="list"></ul>${c.opts?`<div class="opts">${c.opts}</div>`:""}<button class="btn" disabled>${c.go}</button><p class="st"></p>`;
+ const inp=el.querySelector("input"),ul=el.querySelector("ul"),go=el.querySelector(".btn"),st=el.querySelector(".st"),dz=el.querySelector(".drop");
+ const set=(m,e)=>{st.textContent=m;st.className="st"+(e?" err":"")};
+ const draw=()=>{ul.innerHTML=fs.map((f,i)=>`<li><span>${esc(f.name)} <em>${(f.size/1048576).toFixed(2)} MB</em></span>${c.multi?`<button data-a="u" data-i="${i}">↑</button><button data-a="d" data-i="${i}">↓</button>`:""}<button data-a="x" data-i="${i}">✕</button></li>`).join("");go.disabled=fs.length<(c.min||1)};
+ const add=l=>{l=[...l];fs=c.multi?fs.concat(l):l.slice(0,1);draw();set("")};
+ inp.onchange=()=>{add(inp.files);inp.value=""};
+ dz.ondragover=e=>e.preventDefault();dz.ondrop=e=>{e.preventDefault();add(e.dataTransfer.files)};
+ ul.onclick=e=>{const b=e.target.closest("button");if(!b)return;const i=+b.dataset.i,a=b.dataset.a;if(a=="x")fs.splice(i,1);else{const j=a=="u"?i-1:i+1;if(j>=0&&j<fs.length)[fs[i],fs[j]]=[fs[j],fs[i]]}draw()};
+ go.onclick=async()=>{go.disabled=true;set("Working…");try{const r=await c.run(fs,el,set);set(r.note||"");await finish(r.name,r.data)}catch(e){console.error(e);set("Something went wrong: "+(e.message||e),1)}draw()}}
+function editor(el,mode){const sign=mode=="sign";let pdf,bytes,pg=1,sc=1,items=[],drawn=0,st0;
+ el.innerHTML=`<label class="drop"><input type="file" hidden accept="${pdfAcc}"><b>Choose a PDF</b> or drop here</label><div id="ed" hidden>
+ <div class="tb">${sign?`<select id="sm"><option value="draw">Draw signature</option><option value="type">Type signature</option></select><span id="tp" class="tb" hidden><input id="stx" placeholder="Type your name" value="Your Name"><select id="sf"><option value="{s}px 'Brush Script MT','Segoe Script','Snell Roundhand',cursive">Script</option><option value="italic {s}px Georgia,serif">Elegant</option><option value="{s}px 'Courier New',monospace">Typewriter</option><option value="bold {s}px Arial,sans-serif">Plain</option></select><input type="color" id="tcl" value="#0b2a6f"></span><canvas id="pad" width="300" height="120"></canvas><div><button class="btn ghost sm" id="clr">Clear</button><label> Size <input type="range" id="sw" min="200" max="2000" value="600"></label></div><p class="mu" style="width:100%;margin:0">Draw your signature, or switch to Type and edit the text, font and color. Use the size slider, then click the page where it should go.</p>`
+ :`<select id="md"><option value="text">Add text</option><option value="white">Whiteout (drag)</option></select><input id="tx" placeholder="Text to add" value="Your text"><label>Size <input type="number" id="fs" value="16" min="6" max="96" style="width:70px"></label><input type="color" id="cl" value="#000000"><p class="mu" style="width:100%;margin:0">Click the page to place text, or drag to cover content. Whiteout hides content visually but doesn’t delete it. Click an item to remove it.</p>`}</div>
+ <div class="nav"><button class="btn ghost sm" id="pv">←</button><span id="pn"></span><button class="btn ghost sm" id="nx">→</button></div>
+ <div class="stage" id="sg"><canvas id="cv"></canvas></div><br><button class="btn" id="sv">${sign?"Save signed PDF":"Save edited PDF"}</button><p class="st"></p></div>`;
+ const inp=el.querySelector("input"),ed=$("#ed"),cv=$("#cv"),sg=$("#sg"),st=el.querySelector(".st"),set=(m,e)=>{st.textContent=m;st.className="st"+(e?" err":"")};
+ const load=async f=>{if(!f)return;bytes=await buf(f);pdf=await pdfjsLib.getDocument({data:new Uint8Array(bytes.slice(0))}).promise;pg=1;items=[];ed.hidden=false;show()};
+ inp.onchange=()=>load(inp.files[0]);const dz=el.querySelector(".drop");dz.ondragover=e=>e.preventDefault();dz.ondrop=e=>{e.preventDefault();load(e.dataTransfer.files[0])};
+ async function show(){const p=await pdf.getPage(pg);sc=Math.min(el.clientWidth-4,820)/p.getViewport({scale:1}).width;await rp(p,sc,cv);$("#pn").textContent="Page "+pg+" of "+pdf.numPages;paint()}
+ function paint(){sg.querySelectorAll(".it").forEach(n=>n.remove());items.forEach((o,i)=>{if(o.pg!=pg)return;const d=document.createElement("div");d.className="it";d.title="Click to remove";
+  d.style.cssText=`left:${o.x*sc}px;top:${o.y*sc}px;`+(o.t=="text"?`font-size:${o.s*sc}px;color:${o.c}`:o.t=="white"?`width:${o.w*sc}px;height:${o.h*sc}px;background:#fff;outline:1px dashed #e5322d`:`width:${o.w*sc}px;height:${o.h*sc}px;background:url(${o.u}) center/contain no-repeat`);
+  if(o.t=="text")d.textContent=o.v;d.onpointerdown=e=>e.stopPropagation();d.onclick=()=>{items.splice(i,1);paint()};sg.append(d)})}
+ $("#pv").onclick=()=>{if(pg>1){pg--;show()}};$("#nx").onclick=()=>{if(pg<pdf.numPages){pg++;show()}};
+ sg.onpointerdown=e=>{const r=cv.getBoundingClientRect();st0={x:e.clientX-r.left,y:e.clientY-r.top}};
+ sg.onpointerup=e=>{if(!st0)return;const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,m=sign?"sign":$("#md").value;
+  if(m=="white"){const w=Math.abs(x-st0.x),h=Math.abs(y-st0.y);if(w>6&&h>6)items.push({pg,t:"white",x:Math.min(x,st0.x)/sc,y:Math.min(y,st0.y)/sc,w:w/sc,h:h/sc})}
+  else if(m=="text"){const v=$("#tx").value;if(v)items.push({pg,t:"text",x:x/sc,y:y/sc,v,s:+$("#fs").value||16,c:$("#cl").value})}
+  else{if(!drawn){set("Draw your signature first.",1);st0=0;return}set("");const w=+$("#sw").value,h=w*120/300,pad=$("#pad");items.push({pg,t:"sig",x:x/sc-w/2,y:y/sc-h/2,w,h,u:pad.toDataURL()})}
+  st0=0;paint()};
+ if(sign){const pad=$("#pad"),g=pad.getContext("2d"),pt=e=>{const r=pad.getBoundingClientRect();return{x:(e.clientX-r.left)*300/r.width,y:(e.clientY-r.top)*120/r.height}};let dn=0;g.lineWidth=3;g.lineCap="round";g.lineJoin="round";g.strokeStyle="#000000";pad.style.touchAction="none";
+  pad.onpointerdown=e=>{dn=1;drawn=1;g.beginPath();const p=pt(e);g.moveTo(p.x,p.y);g.lineTo(p.x+.1,p.y);g.stroke()};pad.onpointermove=e=>{if(!dn)return;const p=pt(e);g.lineTo(p.x,p.y);g.stroke()};pad.onpointerup=pad.onpointerleave=()=>dn=0;$("#clr").onclick=()=>{if($("#sm").value=="type")$("#stx").value="";g.clearRect(0,0,300,120);drawn=0};
+  const typ=()=>{const t=$("#stx").value.trim();g.clearRect(0,0,300,120);if(!t){drawn=0;return}let s=80;const f=()=>$("#sf").value.replace("{s}",s);g.font=f();while(g.measureText(t).width>280&&s>12){s-=2;g.font=f()}g.fillStyle=$("#tcl").value;g.textAlign="center";g.textBaseline="middle";g.fillText(t,150,62);drawn=1};
+  $("#sm").onchange=e=>{const ty=e.target.value=="type";$("#tp").hidden=!ty;pad.style.pointerEvents=ty?"none":"auto";g.clearRect(0,0,300,120);drawn=0;if(ty)typ()};
+  ["#stx","#sf","#tcl"].forEach(i=>$(i).oninput=typ)}
+ else $("#md").onchange=e=>sg.style.touchAction=e.target.value=="white"?"none":"auto";
+ $("#sv").onclick=async()=>{if(!items.length)return set("Add at least one item first.",1);set("Saving…");
+  try{const d=await PDFDocument.load(bytes,{ignoreEncryption:true}),f=await d.embedFont(StandardFonts.Helvetica),ps=d.getPages();
+   for(const o of items){const p=ps[o.pg-1],H=p.getHeight();
+    if(o.t=="text"){const c=o.c;p.drawText(o.v.replace(/[^\x20-\xFF]/g,"?"),{x:o.x,y:H-o.y-o.s*.8,size:o.s,font:f,color:rgb(parseInt(c.slice(1,3),16)/255,parseInt(c.slice(3,5),16)/255,parseInt(c.slice(5,7),16)/255)})}
+    else if(o.t=="white")p.drawRectangle({x:o.x,y:H-o.y-o.h,width:o.w,height:o.h,color:rgb(1,1,1)});
+    else{const im=await d.embedPng(Uint8Array.from(atob(o.u.split(",")[1]),c=>c.charCodeAt(0)));p.drawImage(im,{x:o.x,y:H-o.y-o.h,width:o.w,height:o.h})}}
+   set("");await finish(sign?"signed.pdf":"edited.pdf",await d.save())}catch(e){console.error(e);set("Something went wrong: "+(e.message||e),1)}}}
+// ---- site shell ----
+document.title=CFG.name+" – Free PDF Tools";$("#nm").textContent="🦦 "+CFG.name;
+document.querySelectorAll(".cof").forEach(a=>{a.href=CFG.paypal;a.textContent="☕ Buy me a coffee ("+CFG.price+")"});
+$("#grid").innerHTML=T.map(t=>`<button class="tc" data-id="${t.id}"><i>${t.i}</i><b>${t.n}</b><span>${t.d}</span></button>`).join("");
+$("#grid").onclick=e=>{const b=e.target.closest(".tc");if(!b)return;const t=T.find(x=>x.id==b.dataset.id);$("#home").hidden=true;$("#tool").hidden=false;$("#tt").textContent=t.n;$("#td").textContent=t.d;t.ed?editor($("#tb"),t.ed):generic($("#tb"),t);scrollTo(0,0)};
+$("#back").onclick=()=>{$("#tool").hidden=true;$("#home").hidden=false;$("#tb").innerHTML=""};
+$("#no").onclick=()=>$("#dn").hidden=true;
+{const su=encodeURIComponent(CFG.url||location.href),msg=encodeURIComponent("Free PDF tools: merge, split, compress, edit and sign PDFs right in your browser. "+CFG.name);$("#shx").href="https://twitter.com/intent/tweet?text="+msg+"&url="+su;$("#shf").href="https://www.facebook.com/sharer/sharer.php?u="+su;$("#shl").href="https://www.linkedin.com/sharing/share-offsite/?url="+su}
+let cur=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";const ap=t=>{cur=t;document.documentElement.dataset.theme=t;$("#th").textContent=t=="dark"?"☀️ Light":"🌙 Dark"};ap(cur);$("#th").onclick=()=>ap(cur=="dark"?"light":"dark");
+(async()=>{const rl=$("#rl"),ra=$("#ra"),rf=$("#rf"),rs=$("#rs");let db=null,uid=null,own=false;
+ try{db=await window.claude?.use("db");const u=await window.claude?.use("user");if(u){uid=await u.id();own=u.isOwner()}}catch(e){}
+ if(!db){ra.textContent="Reviews aren’t available in this view.";return}
+ const draw=docs=>{const a=docs.map(d=>{const o=d.data()||{};return{id:d.id,n:o.n,c:o.c,t:+o.t||0,r:Math.max(1,Math.min(5,Math.round(+o.r)||1))}}).sort((x,y)=>y.t-x.t);
+  ra.textContent=a.length?"★ "+(a.reduce((s,x)=>s+x.r,0)/a.length).toFixed(1)+" average from "+a.length+" review"+(a.length>1?"s":""):"No reviews yet. Be the first to leave one!";
+  rl.innerHTML=a.map(x=>`<div class="rv"><b>${esc(String(x.n||"Anonymous"))}</b> <span style="color:#f5a623">${"★".repeat(x.r)+"☆".repeat(5-x.r)}</span>${own?` <button class="btn ghost sm" data-d="${esc(x.id)}">Delete</button>`:""}<div>${esc(String(x.c||""))}</div></div>`).join("")};
+ rl.onclick=e=>{const b=e.target.closest("[data-d]");if(b)db.doc("reviews/"+b.dataset.d).delete().catch(()=>{})};
+ db.collection("reviews").limit(100).onSnapshot(s=>draw(s.docs),()=>{ra.textContent="Couldn’t load reviews."});
+ rf.hidden=false;if(!uid){$("#rb").disabled=true;rs.textContent="Sign in to Claude to leave a review."}
+ $("#rb").onclick=async()=>{const n=$("#rn").value.trim().slice(0,40),c=$("#rc").value.trim().slice(0,300);if(!c){rs.textContent="Please write a short comment.";return}
+  try{await db.doc("reviews/"+uid).set({n:n||"Anonymous",r:+$("#rr").value,c,t:Date.now()});rs.textContent="Thank you for your review! 💛 (Posting again updates it.)";$("#rc").value=""}catch(e){rs.textContent="Couldn’t post your review. You may not have permission."}}
+})();
+</script></body></html>
